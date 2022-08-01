@@ -1,0 +1,37 @@
+.currency-rates {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  align-content: space-between;
+  flex-wrap: wrap;
+  flex-direction: row;
+  padding: 20px;
+}
+.currency-transfer {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 20px;
+}
+
+.convert-btn {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-content: space-between;
+  padding: 20px;
+}
+
+.currency-rate {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 5px;
+  padding: 20px;
+}
+.currency-card {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 5px;
+  padding: 10px;
+}

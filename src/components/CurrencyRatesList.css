@@ -1,0 +1,22 @@
+.rates-list {
+  display: flex;
+  flex-wrap: wrap;
+  /* align-items: flex-start; */
+  justify-content: center;
+  flex-direction: row;
+}
+
+.rate {
+  background-color: #1976d2;
+  margin: 20px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  color: #ffff;
+  font-weight: bold;
+  border-radius: 5px;
+}

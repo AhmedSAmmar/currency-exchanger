@@ -5,7 +5,9 @@ export interface CurrencyState {
   value: {
     fromCurrency: string;
     toCurrency: string;
-    currencyValue: number;
+    currencyValue: string;
+    currencyResult: string;
+    currencyRate: string;
   };
 }
 
@@ -13,7 +15,9 @@ const initialState: CurrencyState = {
   value: {
     fromCurrency: "EUR",
     toCurrency: "USD",
-    currencyValue: 1,
+    currencyValue: "1",
+    currencyResult: "",
+    currencyRate: "",
   },
 };
 
@@ -21,19 +25,30 @@ export const currencySlice = createSlice({
   name: "currency",
   initialState,
   reducers: {
-    fromCurrency: (state, action: PayloadAction<string>) => {
+    fromCurrencyAction: (state, action: PayloadAction<string>) => {
       state.value.fromCurrency = action.payload;
     },
-    toCurrency: (state, action: PayloadAction<string>) => {
+    toCurrencyAction: (state, action: PayloadAction<string>) => {
       state.value.toCurrency = action.payload;
     },
-    currencyValue: (state, action: PayloadAction<number>) => {
+    currencyValueAction: (state, action: PayloadAction<string>) => {
       state.value.currencyValue = action.payload;
+    },
+    currencyResultAction: (state, action: PayloadAction<string>) => {
+      state.value.currencyResult = action.payload;
+    },
+    currencyRateAction: (state, action: PayloadAction<string>) => {
+      state.value.currencyRate = action.payload;
     },
   },
 });
 
-export const { fromCurrency, toCurrency, currencyValue } =
-  currencySlice.actions;
+export const {
+  fromCurrencyAction,
+  toCurrencyAction,
+  currencyValueAction,
+  currencyResultAction,
+  currencyRateAction,
+} = currencySlice.actions;
 
 export default currencySlice.reducer;
