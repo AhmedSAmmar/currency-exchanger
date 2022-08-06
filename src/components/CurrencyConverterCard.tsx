@@ -4,26 +4,30 @@ import { Button, MenuItem, TextField } from "@mui/material";
 import React, { FC, useState } from "react";
 import type { RootState } from "../app/store";
 import { useSelector, useDispatch } from "react-redux";
-import axios from "axios";
-import {
-  fromCurrencyAction,
-  toCurrencyAction,
-  currencyValueAction,
-  currencyResultAction,
-  currencyRateAction,
-} from "../features/currencySlice";
-import { currencyRatesAction } from "../features/currencyRatesSlice";
 import { Link } from "react-router-dom";
 import { startDate, endDate } from "../date";
-import { currencyHistoricalRatesAction } from "../features/currencyHistoricalRatesSlice";
 import "./CurrencyConverterCard.css";
+import {
+  currencyHistoricalRates,
+  currencyRateResults,
+  currencyRates,
+} from "../api";
+import { currencies } from "../currencies";
+import {
+  currencyValueChangeAction,
+  fromCurrencyChangeAction,
+  toCurrencyChangeAction,
+} from "../features/currencyChangesSlice";
 
 interface Props {
-  currencies: Array<string>;
   btnNotDisabled: boolean;
+  fromCurrencyDisabled: boolean;
 }
-const ApiKey: string = `${process.env.REACT_APP_API_KEY}`;
-const CurrencyConverterCard: FC<Props> = ({ currencies, btnNotDisabled }) => {
+
+const CurrencyConverterCard: FC<Props> = ({
+  btnNotDisabled,
+  fromCurrencyDisabled,
+}) => {
   const dispatch = useDispatch();
 
   const fromCurrency = useSelector(
@@ -43,109 +47,46 @@ const CurrencyConverterCard: FC<Props> = ({ currencies, btnNotDisabled }) => {
     (state: RootState) => state.currency.value.currencyRate
   );
 
-  const [amount, setAmount] = useState<string>(currencyValue);
-  const [fromRequestedCurrency, setFromRequestedCurrency] =
-    useState<string>(fromCurrency);
-  const [toRequestedCurrency, setToRequestedCurrency] =
-    useState<string>(toCurrency);
+  const fromCurrencyChange = useSelector(
+    (state: RootState) => state.currencyChanges.value.fromCurrencyChange
+  );
+  const toCurrencyChange = useSelector(
+    (state: RootState) => state.currencyChanges.value.toCurrencyChange
+  );
+  const currencyValueChange = useSelector(
+    (state: RootState) => state.currencyChanges.value.currencyValueChange
+  );
 
-  const handleCurrencyChange = (event: {
-    target: { value: React.SetStateAction<string> };
-  }) => {
-    setAmount(event.target.value);
+  const handleCurrencyChange = (event: { target: { value: string } }) => {
+    dispatch(currencyValueChangeAction(event.target.value));
   };
 
-  const handleFromCurrencyChange = (event: {
-    target: { value: React.SetStateAction<string> };
-  }) => {
-    setFromRequestedCurrency(event.target.value);
+  const handleFromCurrencyChange = (event: { target: { value: string } }) => {
+    dispatch(fromCurrencyChangeAction(event.target.value));
   };
 
-  const handleToCurrencyChange = (event: {
-    target: { value: React.SetStateAction<string> };
-  }) => {
-    setToRequestedCurrency(event.target.value);
-  };
-
-  interface Currency {
-    fromRequestedCurrency: string;
-    toRequestedCurrency: string;
-    amount: string;
-  }
-
-  const currencyRateResults = async ({
-    fromRequestedCurrency,
-    toRequestedCurrency,
-    amount,
-  }: Currency) => {
-    try {
-      const response = await axios({
-        url: `https://api.apilayer.com/fixer/convert?to=${toRequestedCurrency}&from=${fromRequestedCurrency}&amount=${amount}`,
-        headers: { apikey: ApiKey },
-      });
-      dispatch(fromCurrencyAction(fromRequestedCurrency));
-      dispatch(toCurrencyAction(toRequestedCurrency));
-      dispatch(currencyValueAction(amount));
-      dispatch(currencyRateAction(response.data.info.rate));
-      dispatch(currencyResultAction(response.data.result));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const currencyRates = async (fromRequestedCurrency: string) => {
-    try {
-      const currencyString = currencies.toString();
-      const response = await axios({
-        url: `https://api.apilayer.com/fixer/latest?symbols=${currencyString}&base=${fromRequestedCurrency}`,
-        headers: { apikey: ApiKey },
-      });
-
-      dispatch(currencyRatesAction(response.data.rates));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  interface CurrencyHistoricalInfo {
-    fromRequestedCurrency: string;
-    toRequestedCurrency: string;
-    startDate: string;
-    endDate: string;
-  }
-
-  const currencyHistoricalRates = async ({
-    fromRequestedCurrency,
-    toRequestedCurrency,
-    startDate,
-    endDate,
-  }: CurrencyHistoricalInfo) => {
-    try {
-      const response = await axios({
-        url: `https://api.apilayer.com/fixer/timeseries?start_date=${startDate}&end_date=${endDate}&base=${fromCurrency}&symbol=${toCurrency}`,
-        headers: { apikey: ApiKey },
-      });
-
-      dispatch(currencyHistoricalRatesAction(response.data.rates));
-    } catch (error) {
-      console.error(error);
-    }
+  const handleToCurrencyChange = (event: { target: { value: string } }) => {
+    dispatch(toCurrencyChangeAction(event.target.value));
   };
 
   const handleClick = () => {
-    currencyRateResults({ fromRequestedCurrency, toRequestedCurrency, amount });
-    currencyRates(fromRequestedCurrency);
+    currencyRateResults({
+      fromCurrencyChange,
+      toCurrencyChange,
+      currencyValueChange,
+    });
+    currencyRates(fromCurrencyChange);
     currencyHistoricalRates({
-      fromRequestedCurrency,
-      toRequestedCurrency,
+      fromCurrencyChange,
+      toCurrencyChange,
       startDate,
       endDate,
     });
   };
 
   const handleArrowClick = () => {
-    setFromRequestedCurrency(toRequestedCurrency);
-    setToRequestedCurrency(fromRequestedCurrency);
+    dispatch(fromCurrencyChangeAction(toCurrencyChange));
+    dispatch(toCurrencyChangeAction(fromCurrencyChange));
   };
 
   return (
@@ -156,7 +97,7 @@ const CurrencyConverterCard: FC<Props> = ({ currencies, btnNotDisabled }) => {
             id="outlined-multiline-flexible"
             label="Amount"
             type="number"
-            value={amount}
+            value={currencyValueChange}
             onChange={handleCurrencyChange}
             className="currency-item"
           />
@@ -164,13 +105,14 @@ const CurrencyConverterCard: FC<Props> = ({ currencies, btnNotDisabled }) => {
             id="outlined-select-currency"
             select
             label="From"
-            value={fromRequestedCurrency}
+            value={fromCurrencyChange}
             onChange={handleFromCurrencyChange}
             className="currency-item"
+            disabled={fromCurrencyDisabled}
           >
             {currencies.map((newCurrency) => (
-              <MenuItem key={newCurrency} value={newCurrency}>
-                {newCurrency}
+              <MenuItem key={newCurrency.symbol} value={newCurrency.symbol}>
+                {newCurrency.symbol}
               </MenuItem>
             ))}
           </TextField>
@@ -187,12 +129,13 @@ const CurrencyConverterCard: FC<Props> = ({ currencies, btnNotDisabled }) => {
             id="outlined-select-currency"
             select
             label="To"
-            value={toRequestedCurrency}
+            value={toCurrencyChange}
             onChange={handleToCurrencyChange}
             className="currency-item"
           >
             {currencies
-              .filter((currency) => currency !== fromRequestedCurrency)
+              .map((currency) => currency.symbol)
+              .filter((currency) => currency !== fromCurrencyChange)
               .map((newCurrency) => (
                 <MenuItem key={newCurrency} value={newCurrency}>
                   {newCurrency}

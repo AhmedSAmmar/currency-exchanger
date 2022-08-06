@@ -4,123 +4,55 @@ import { faCoins } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@mui/material";
 import "./NavBar.css";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import {
-  fromCurrencyAction,
-  toCurrencyAction,
-  currencyValueAction,
-  currencyResultAction,
-  currencyRateAction,
-} from "../features/currencySlice";
-import { useDispatch } from "react-redux";
-import { currencyRatesAction } from "../features/currencyRatesSlice";
-import { currencyHistoricalRatesAction } from "../features/currencyHistoricalRatesSlice";
 import { startDate, endDate } from "../date";
+import {
+  currencyHistoricalRates,
+  currencyRateResults,
+  currencyRates,
+} from "../api";
+import {
+  currencyValueChangeAction,
+  fromCurrencyChangeAction,
+  toCurrencyChangeAction,
+} from "../features/currencyChangesSlice";
+import { useDispatch } from "react-redux";
 
-const ApiKey: string = `${process.env.REACT_APP_API_KEY}`;
-const currencies: Array<string> = [
-  "EUR",
-  "USD",
-  "EGP",
-  "AED",
-  "CAD",
-  "HKD",
-  "SAR",
-  "KWD",
-  "JPY",
-];
 const NavBar: FC = () => {
   const dispatch = useDispatch();
-
-  interface Currency {
-    fromRequestedCurrency: string;
-    toRequestedCurrency: string;
-    amount: string;
-  }
-
-  const currencyRateResults = async ({
-    fromRequestedCurrency,
-    toRequestedCurrency,
-    amount,
-  }: Currency) => {
-    try {
-      const response = await axios({
-        url: `https://api.apilayer.com/fixer/convert?to=${toRequestedCurrency}&from=${fromRequestedCurrency}&amount=${amount}`,
-        headers: { apikey: ApiKey },
-      });
-      console.log(typeof response.data.result);
-      console.log(response.data.result);
-      dispatch(fromCurrencyAction(fromRequestedCurrency));
-      dispatch(toCurrencyAction(toRequestedCurrency));
-      dispatch(currencyValueAction(amount));
-      dispatch(currencyRateAction(response.data.info.rate));
-      dispatch(currencyResultAction(response.data.result));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const currencyRates = async (fromCurrency: string) => {
-    try {
-      const currencyString = currencies.toString();
-      const response = await axios({
-        url: `https://api.apilayer.com/fixer/latest?symbols=${currencyString}&base=${fromCurrency}`,
-        headers: { apikey: ApiKey },
-      });
-      console.log(response.data.rates);
-      dispatch(currencyRatesAction(response.data.rates));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  interface CurrencyHistoricalInfo {
-    fromCurrency: string;
-    toCurrency: string;
-    startDate: string;
-    endDate: string;
-  }
-
-  const currencyHistoricalRates = async ({
-    fromCurrency,
-    toCurrency,
-    startDate,
-    endDate,
-  }: CurrencyHistoricalInfo) => {
-    try {
-      const response = await axios({
-        url: `https://api.apilayer.com/fixer/timeseries?start_date=${startDate}&end_date=${endDate}&base=${fromCurrency}&symbol=${toCurrency}`,
-        headers: { apikey: ApiKey },
-      });
-      console.log(response.data);
-      dispatch(currencyHistoricalRatesAction(response.data.rates));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const handleEurUsdClick = () => {
+    dispatch(fromCurrencyChangeAction("EUR"));
+    dispatch(toCurrencyChangeAction("USD"));
+    dispatch(currencyValueChangeAction("1"));
     currencyRateResults({
-      fromRequestedCurrency: "EUR",
-      toRequestedCurrency: "USD",
-      amount: "1",
+      fromCurrencyChange: "EUR",
+      toCurrencyChange: "USD",
+      currencyValueChange: "1",
     });
-
     currencyRates("EUR");
-
     currencyHistoricalRates({
-      fromCurrency: "EUR",
-      toCurrency: "USD",
+      fromCurrencyChange: "EUR",
+      toCurrencyChange: "USD",
       startDate: startDate,
       endDate: endDate,
     });
   };
 
   const handleEurGbpClick = () => {
+    dispatch(fromCurrencyChangeAction("EUR"));
+    dispatch(toCurrencyChangeAction("GBP"));
+    dispatch(currencyValueChangeAction("1"));
     currencyRateResults({
-      fromRequestedCurrency: "EUR",
-      toRequestedCurrency: "GBP",
-      amount: "1",
+      fromCurrencyChange: "EUR",
+      toCurrencyChange: "GBP",
+      currencyValueChange: "1",
+    });
+    currencyRates("EUR");
+
+    currencyHistoricalRates({
+      fromCurrencyChange: "EUR",
+      toCurrencyChange: "GBP",
+      startDate: startDate,
+      endDate: endDate,
     });
   };
   return (

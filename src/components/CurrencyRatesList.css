@@ -4,11 +4,13 @@
   /* align-items: flex-start; */
   justify-content: center;
   flex-direction: row;
+  gap: 100px;
+  padding: 20px 0;
 }
 
 .rate {
   background-color: #1976d2;
-  margin: 20px;
+  /* margin: 20px; */
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   width: 300px;
   height: 300px;
