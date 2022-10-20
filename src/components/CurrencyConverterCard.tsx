@@ -30,31 +30,14 @@ const CurrencyConverterCard: FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const fromCurrency = useSelector(
-    (state: RootState) => state.currency.value.fromCurrency
-  );
-  const toCurrency = useSelector(
-    (state: RootState) => state.currency.value.toCurrency
-  );
-  const currencyValue = useSelector(
-    (state: RootState) => state.currency.value.currencyValue
-  );
-  const currencyResult = useSelector(
-    (state: RootState) => state.currency.value.currencyResult
-  );
+  const { fromCurrency, toCurrency, currencyValue, currencyResult } =
+    useSelector((state: RootState) => state.currency.value);
+
+  const { fromCurrencyChange, toCurrencyChange, currencyValueChange } =
+    useSelector((state: RootState) => state.currencyChanges.value);
 
   const currencyRate = useSelector(
     (state: RootState) => state.currency.value.currencyRate
-  );
-
-  const fromCurrencyChange = useSelector(
-    (state: RootState) => state.currencyChanges.value.fromCurrencyChange
-  );
-  const toCurrencyChange = useSelector(
-    (state: RootState) => state.currencyChanges.value.toCurrencyChange
-  );
-  const currencyValueChange = useSelector(
-    (state: RootState) => state.currencyChanges.value.currencyValueChange
   );
 
   const handleCurrencyChange = (event: { target: { value: string } }) => {
